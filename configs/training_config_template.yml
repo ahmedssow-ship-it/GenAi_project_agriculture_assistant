@@ -1,0 +1,111 @@
+seed: 42
+
+splits:
+  train_ratio: 0.90
+  validation_ratio: 0.05
+  eval_ratio: 0.05
+  split_policy: stratified_by_source
+
+model:
+  model_choice: qwen
+  base_model: Qwen/Qwen3-0.6B
+  resource_constraint: small_open_model_for_limited_compute
+
+training:
+  epochs: 3
+  batch_size: 1
+  grad_accum: 8
+  max_seq_length: 512
+
+  learning_rate: 0.0001
+  warmup_steps: 50
+  weight_decay: 0.01
+
+  lora_r: 16
+  lora_alpha: 32
+  lora_dropout: 0.05
+
+  logging_steps: 10
+  save_steps: 500
+  save_total_limit: 10
+  eval_steps: 400
+
+data_sources:
+
+  - name: general
+    description: "General agricultural instruction dataset"
+    raw_path: data/source_1_general.jsonl
+    chat_path: data/chat_general.json
+    default_category: agriculture_general
+
+  - name: synthetic
+    description: "Synthetic agricultural QA dataset"
+    raw_path: data/source_2_synthetic.jsonl
+    chat_path: data/chat_synthetic.json
+    default_category: synthetic
+
+  - name: domain
+    description: "Domain-specific agricultural expert dataset"
+    raw_path: data/source_3_domain.jsonl
+    chat_path: data/chat_domain.json
+    default_category: agriculture_domain
+
+training_data:
+
+  - name: general
+    path: data/splits/chat_general_train.json
+    weight: 1.0
+
+  - name: synthetic
+    path: data/splits/chat_synthetic_train.json
+    weight: 1.0
+
+  - name: domain
+    path: data/splits/chat_domain_train.json
+    weight: 1.0
+
+validation_data:
+
+  - name: general
+    path: data/splits/chat_general_validation.json
+
+  - name: synthetic
+    path: data/splits/chat_synthetic_validation.json
+
+  - name: domain
+    path: data/splits/chat_domain_validation.json
+
+eval_data:
+
+  combined_path: data/splits/eval_all.jsonl
+
+  sources:
+
+    - name: general
+      path: data/splits/chat_general_eval.json
+
+    - name: synthetic
+      path: data/splits/chat_synthetic_eval.json
+
+    - name: domain
+      path: data/splits/chat_domain_eval.json
+
+metadata:
+
+  project_name: agriculture_assistant
+
+  language: english
+
+  domain: agriculture
+
+  sources_used:
+    - Satyam66/Agricare
+    - KisanVaani/agriculture-qa-english-only
+    - talhakk/agriculture-qa
+
+  objective: >
+    Fine-tune Qwen3-0.6B with LoRA to create
+    an agricultural assistant capable of answering
+    practical farming questions, crop management
+    questions, soil health questions, irrigation
+    questions and pest management questions.
